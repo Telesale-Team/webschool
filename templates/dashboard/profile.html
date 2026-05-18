@@ -1,0 +1,251 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}โปรไฟล์ครู{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-user-cog mr-2 text-primary"></i>โปรไฟล์ครู{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">โปรไฟล์ครู</li>
+{% endblock %}
+
+{% block content %}
+  <!-- Flash Messages -->
+  {% if messages %}
+    {% for m in messages %}
+    <div class="alert alert-{{ m.tags|cut:'messages ' }} alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      <i class="fas fa-{% if m.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} mr-1"></i>{{ m }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+
+    <!-- Card 1: รูปโปรไฟล์ -->
+    <div class="col-md-4">
+      <div class="card card-primary card-outline">
+        <div class="card-body text-center pt-4 pb-4">
+          <!-- รูปโปรไฟล์ -->
+          <div class="mb-3">
+            {% if teacher.avatar %}
+              <img src="{{ teacher.avatar.url }}"
+                   id="avatar-preview"
+                   class="img-circle elevation-3"
+                   alt="รูปโปรไฟล์"
+                   style="width:120px;height:120px;object-fit:cover;border:3px solid #3b82f6;">
+            {% else %}
+              <i class="fas fa-user-circle text-secondary" id="avatar-icon" style="font-size:7rem;line-height:1;"></i>
+              <img src=""
+                   id="avatar-preview"
+                   class="img-circle elevation-3 d-none"
+                   alt="รูปโปรไฟล์"
+                   style="width:120px;height:120px;object-fit:cover;border:3px solid #3b82f6;">
+            {% endif %}
+          </div>
+
+          <!-- ชื่อ-นามสกุล -->
+          <h4 class="mb-1 font-weight-bold">{{ teacher.first_name }} {{ teacher.last_name }}</h4>
+
+          <!-- วิชาที่สอน -->
+          {% if teacher.subject %}
+            <span class="badge badge-primary px-3 py-1" style="font-size:.85rem;border-radius:20px;">
+              <i class="fas fa-book mr-1"></i>{{ teacher.subject }}
+            </span>
+          {% else %}
+            <span class="text-muted small">ยังไม่ได้ระบุวิชาที่สอน</span>
+          {% endif %}
+
+          <hr class="mt-3 mb-3">
+
+          <div class="text-left px-2">
+            <small class="text-muted">{% if teacher.avatar %}มีรูปโปรไฟล์แล้ว{% else %}ยังไม่มีรูปโปรไฟล์{% endif %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Card 1 -->
+
+    <div class="col-md-8">
+
+      <!-- Card 2: ข้อมูลส่วนตัว -->
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-id-card mr-1"></i>ข้อมูลส่วนตัว</h3>
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" id="form-update-info">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_info">
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-user mr-1 text-muted"></i>ชื่อ <span class="text-danger">*</span></label>
+                  <input type="text" name="first_name" class="form-control"
+                         value="{{ teacher.first_name }}" required
+                         placeholder="ชื่อ">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-user mr-1 text-muted"></i>นามสกุล <span class="text-danger">*</span></label>
+                  <input type="text" name="last_name" class="form-control"
+                         value="{{ teacher.last_name }}" required
+                         placeholder="นามสกุล">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-envelope mr-1 text-muted"></i>อีเมล</label>
+                  <input type="email" name="email" class="form-control"
+                         value="{{ teacher.email|default:'' }}"
+                         placeholder="อีเมลของครู">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-phone mr-1 text-muted"></i>เบอร์โทรศัพท์</label>
+                  <input type="text" name="phone" class="form-control"
+                         value="{{ teacher.phone|default:'' }}"
+                         placeholder="เบอร์โทรศัพท์">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label><i class="fas fa-camera mr-1 text-muted"></i>รูปโปรไฟล์</label>
+              {% if teacher.avatar %}
+              <div class="mb-2">
+                <img src="{{ teacher.avatar.url }}" class="img-circle img-thumbnail" style="width:80px;height:80px;object-fit:cover;">
+                <small class="text-muted ml-2">รูปปัจจุบัน</small>
+              </div>
+              {% endif %}
+              <input type="file" name="avatar" class="form-control-file" accept="image/*">
+              <small class="form-text text-muted">แนะนำ 400×400px · JPG/PNG · ไม่เกิน 1MB</small>
+            </div>
+
+            <div class="mt-1">
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="fas fa-save mr-1"></i>บันทึกข้อมูล
+              </button>
+              <a href="{% url 'questions:dashboard' %}" class="btn btn-secondary ml-2">
+                ยกเลิก
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- End Card 2 -->
+
+      <!-- Card 3: เปลี่ยนรหัสผ่าน -->
+      <div class="card card-warning card-outline">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-lock mr-1"></i>เปลี่ยนรหัสผ่าน</h3>
+        </div>
+        <div class="card-body">
+          <form method="post" id="form-change-password">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="form-group">
+              <label><i class="fas fa-key mr-1 text-muted"></i>รหัสผ่านเดิม <span class="text-danger">*</span></label>
+              <input type="password" name="old_password" class="form-control"
+                     placeholder="กรอกรหัสผ่านเดิม" autocomplete="current-password" required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-lock mr-1 text-muted"></i>รหัสผ่านใหม่ <span class="text-danger">*</span></label>
+                  <input type="password" name="new_password" id="new-password" class="form-control"
+                         placeholder="รหัสผ่านใหม่ (อย่างน้อย 4 ตัว)" autocomplete="new-password" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label><i class="fas fa-lock mr-1 text-muted"></i>ยืนยันรหัสผ่านใหม่ <span class="text-danger">*</span></label>
+                  <input type="password" name="confirm_password" id="confirm-password" class="form-control"
+                         placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password" required>
+                  <small id="password-match-msg" class="form-text"></small>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-1">
+              <button type="submit" class="btn btn-warning px-4" id="btn-change-password">
+                <i class="fas fa-key mr-1"></i>เปลี่ยนรหัสผ่าน
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- End Card 3 -->
+
+    </div>
+    <!-- End col-md-8 -->
+
+  </div>
+  <!-- End row -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+
+  /* --- Preview รูปโปรไฟล์ real-time --- */
+  $('#input-avatar').on('input', function () {
+    var url = $(this).val().trim();
+    var $preview = $('#avatar-preview');
+    var $icon    = $('#avatar-icon');
+
+    if (url) {
+      $preview.attr('src', url).removeClass('d-none');
+      if ($icon.length) $icon.addClass('d-none');
+    } else {
+      $preview.addClass('d-none').attr('src', '');
+      if ($icon.length) $icon.removeClass('d-none');
+    }
+  });
+
+  /* --- ตรวจสอบรหัสผ่านตรงกัน --- */
+  function checkPasswordMatch() {
+    var pw1 = $('#new-password').val();
+    var pw2 = $('#confirm-password').val();
+    var $msg = $('#password-match-msg');
+    var $btn = $('#btn-change-password');
+
+    if (pw2.length === 0) {
+      $msg.text('').removeClass('text-danger text-success');
+      $btn.prop('disabled', false);
+      return;
+    }
+
+    if (pw1 === pw2) {
+      $msg.text('รหัสผ่านตรงกัน').removeClass('text-danger').addClass('text-success');
+      $btn.prop('disabled', false);
+    } else {
+      $msg.text('รหัสผ่านไม่ตรงกัน').removeClass('text-success').addClass('text-danger');
+      $btn.prop('disabled', true);
+    }
+  }
+
+  $('#new-password, #confirm-password').on('input', checkPasswordMatch);
+
+  /* --- ป้องกัน submit เมื่อรหัสผ่านไม่ตรง --- */
+  $('#form-change-password').on('submit', function (e) {
+    var pw1 = $('#new-password').val();
+    var pw2 = $('#confirm-password').val();
+    if (pw1 !== pw2) {
+      e.preventDefault();
+      $('#password-match-msg').text('กรุณาตรวจสอบรหัสผ่านให้ตรงกันก่อนบันทึก').removeClass('text-success').addClass('text-danger');
+    }
+  });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}นักเรียน — เข้าสู่ระบบ{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+
+{% block extra_css %}
+<style>
+  html, body { height: 100%; margin: 0; }
+  .split-page {
+    display: flex; min-height: 100vh;
+  }
+  /* ===== LEFT IMAGE PANEL ===== */
+  .split-image {
+    flex: 1.1;
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  @media (min-width: 768px) { .split-image { display: block; } }
+  .split-image img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+  }
+  .split-image .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      rgba(30,58,95,0.72) 0%,
+      rgba(59,130,246,0.45) 100%);
+  }
+  .split-image .caption {
+    position: absolute; bottom: 2.5rem; left: 2.5rem; right: 2.5rem;
+    color: #fff;
+  }
+  .split-image .caption h2 {
+    font-size: 2rem; font-weight: 700; margin-bottom: .5rem;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .split-image .caption p {
+    font-size: 1rem; opacity: .85;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+  }
+  .split-image .logo-badge {
+    position: absolute; top: 2rem; left: 2rem;
+    display: flex; align-items: center; gap: .6rem;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 999px; padding: .45rem 1.1rem;
+    color: #fff; font-weight: 600; font-size: .95rem;
+  }
+
+  /* ===== RIGHT FORM PANEL ===== */
+  .split-form {
+    flex: .9; display: flex; align-items: center; justify-content: center;
+    background: #f8fafc; padding: 2rem;
+    min-height: 100vh;
+  }
+  .form-box { width: 100%; max-width: 400px; }
+  .form-box .brand {
+    text-align: center; margin-bottom: 2rem;
+  }
+  .form-box .brand .icon-circle {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+    border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+    margin-bottom: 1rem;
+  }
+  .form-box .brand h3 { font-size: 1.5rem; font-weight: 700; color: #1e3a5f; }
+  .form-box .brand p { color: #64748b; font-size: .9rem; }
+
+  .form-card {
+    background: #fff; border-radius: 1.25rem;
+    padding: 2rem; box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+  }
+  .form-card .form-label { font-size: .85rem; font-weight: 600; color: #475569; margin-bottom: .35rem; }
+  .form-card .form-control {
+    border-radius: .6rem; border: 1.5px solid #e2e8f0;
+    padding: .65rem 1rem; font-size: .95rem; color: #1e293b;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .form-card .form-control:focus {
+    border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    outline: none;
+  }
+  .btn-login {
+    width: 100%; background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+    color: #fff; border: none; border-radius: .75rem;
+    padding: .8rem; font-size: 1rem; font-weight: 600;
+    margin-top: .5rem; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,0.4); }
+
+  /* demo box */
+  .demo-box {
+    background: #fffbeb; border: 1.5px dashed #f59e0b;
+    border-radius: .75rem; padding: .75rem 1rem; margin-bottom: 1.25rem;
+  }
+  .demo-box p { font-size: .78rem; color: #92400e; font-weight: 600; margin-bottom: .4rem; }
+  .btn-demo {
+    width: 100%; background: #f59e0b; color: #fff; border: none;
+    border-radius: .5rem; padding: .5rem; font-size: .88rem; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-demo:hover { background: #d97706; }
+
+  .divider { border-top: 1px solid #e2e8f0; margin: 1.25rem 0; }
+  .link-row { text-align: center; font-size: .88rem; color: #64748b; }
+  .link-row a { color: #3b82f6; font-weight: 600; text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="split-page">
+
+  <!-- LEFT: Image Panel -->
+  <div class="split-image">
+    <img src="{% if config.student_login_bg %}{{ config.student_login_bg }}{% else %}https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=85{% endif %}" alt="students studying">
+    <div class="overlay"></div>
+    <div class="logo-badge">
+      <i class="fas fa-graduation-cap"></i> ห้องสอบออนไลน์
+    </div>
+    <div class="caption">
+      <h2>พร้อมสอบแล้วหรือยัง?</h2>
+      <p>ระบบสอบออนไลน์ที่ออกแบบมาเพื่อนักเรียน<br>ข้อสอบ Random เรียงจากง่ายไปยาก</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form Panel -->
+  <div class="split-form">
+    <div class="form-box">
+      <div class="brand">
+        <div class="icon-circle">
+          <i class="fas fa-user-graduate" style="color:#fff;font-size:1.6rem;"></i>
+        </div>
+        <h3>นักเรียน — เข้าสู่ระบบ</h3>
+        <p>ป้อนเลขประจำตัวและรหัสผ่านเพื่อเข้าห้องสอบ</p>
+      </div>
+
+      {% if messages %}
+        {% for m in messages %}
+        <div class="alert alert-danger rounded-lg mb-3">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Demo Box -->
+      <div class="demo-box">
+        <p><i class="fas fa-flask mr-1"></i>Demo — กดเพื่อใส่ข้อมูลทดสอบ</p>
+        <button type="button" class="btn-demo" onclick="fillStudentDemo()">
+          <i class="fas fa-bolt mr-1"></i>นักเรียน Demo (demo001 / demo1234)
+        </button>
+      </div>
+
+      <div class="form-card">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">เลขประจำตัวนักเรียน</label>
+            <input id="f-sid" type="text" name="student_id" class="form-control"
+                   placeholder="กรอกเลขประจำตัว" required autocomplete="username">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">รหัสผ่าน</label>
+            <input id="f-pwd" type="password" name="password" class="form-control"
+                   placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt mr-1"></i>เข้าสู่ห้องสอบ
+          </button>
+        </form>
+      </div>
+
+      <div class="divider"></div>
+      <div class="link-row">
+        <a href="{% url 'accounts:student_register' %}">สมัครสมาชิกใหม่</a>
+        &nbsp;·&nbsp;
+        <a href="{% url 'home' %}" class="text-muted" style="color:#94a3b8!important;">← กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fillStudentDemo() {
+  document.getElementById('f-sid').value = 'demo001';
+  document.getElementById('f-pwd').value = 'demo1234';
+}
+</script>
+{% endblock %}

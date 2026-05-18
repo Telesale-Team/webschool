@@ -1,0 +1,374 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประกาศผลการสอบ — {{ config.subject_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #0a0f1e 0%, #0d1b3e 35%, #0f2551 60%, #0a0f1e 100%);
+      background-attachment: fixed;
+      color: #e2e8f0;
+    }
+
+    /* ===== ANIMATED BG ===== */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 15% 40%, rgba(59,130,246,0.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(99,102,241,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .page-wrap {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ===== HEADER ===== */
+    .page-header {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+    }
+    .header-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(59,130,246,0.18);
+      border: 1px solid rgba(59,130,246,0.35);
+      border-radius: 999px; padding: .4rem 1.1rem;
+      color: #93c5fd; font-size: .82rem; font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+    .header-badge .dot-pulse {
+      width: 7px; height: 7px; background: #60a5fa;
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .4; transform: scale(1.5); }
+    }
+    .page-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 800; color: #fff;
+      text-shadow: 0 2px 24px rgba(0,0,0,0.4);
+      line-height: 1.25; margin-bottom: .5rem;
+    }
+    .page-header h1 span { color: #60a5fa; }
+    .page-header .subtitle {
+      font-size: 1rem; color: rgba(255,255,255,0.55);
+      margin-bottom: 1.5rem;
+    }
+    .participants-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: .75rem; padding: .55rem 1.2rem;
+      font-size: .9rem; color: rgba(255,255,255,0.7);
+    }
+    .participants-badge strong { color: #fff; font-size: 1.1rem; }
+
+    /* ===== MAIN CARD ===== */
+    .main-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem;
+      width: 100%;
+    }
+
+    .glass-table-wrap {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+
+    .table-header-bar {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: .6rem;
+      font-weight: 700; font-size: 1rem; color: #e2e8f0;
+    }
+    .table-header-bar i { color: #60a5fa; }
+
+    /* ===== TABLE ===== */
+    .leaderboard-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .leaderboard-table thead th {
+      padding: .85rem 1rem;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.45);
+      font-size: .78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+    .leaderboard-table thead th:first-child { padding-left: 1.5rem; }
+    .leaderboard-table thead th:last-child { padding-right: 1.5rem; }
+
+    .leaderboard-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background .15s;
+    }
+    .leaderboard-table tbody tr:last-child { border-bottom: none; }
+    .leaderboard-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+    .leaderboard-table tbody td {
+      padding: .85rem 1rem;
+      vertical-align: middle;
+      font-size: .95rem;
+    }
+    .leaderboard-table tbody td:first-child { padding-left: 1.5rem; }
+    .leaderboard-table tbody td:last-child  { padding-right: 1.5rem; }
+
+    /* ===== TOP 3 ROWS ===== */
+    .row-gold {
+      background: linear-gradient(90deg, rgba(251,191,36,0.13) 0%, rgba(251,191,36,0.04) 100%) !important;
+    }
+    .row-silver {
+      background: linear-gradient(90deg, rgba(148,163,184,0.12) 0%, rgba(148,163,184,0.03) 100%) !important;
+    }
+    .row-bronze {
+      background: linear-gradient(90deg, rgba(205,127,50,0.12) 0%, rgba(205,127,50,0.03) 100%) !important;
+    }
+    .row-gold:hover   { background: linear-gradient(90deg, rgba(251,191,36,0.2) 0%, rgba(251,191,36,0.08) 100%) !important; }
+    .row-silver:hover { background: linear-gradient(90deg, rgba(148,163,184,0.18) 0%, rgba(148,163,184,0.07) 100%) !important; }
+    .row-bronze:hover { background: linear-gradient(90deg, rgba(205,127,50,0.18) 0%, rgba(205,127,50,0.07) 100%) !important; }
+
+    /* ===== RANK BADGE ===== */
+    .rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      font-weight: 800; font-size: .95rem;
+    }
+    .rank-badge.gold   { background: rgba(251,191,36,0.2); color: #fbbf24; border: 1.5px solid rgba(251,191,36,0.45); }
+    .rank-badge.silver { background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1.5px solid rgba(148,163,184,0.4); }
+    .rank-badge.bronze { background: rgba(205,127,50,0.2); color: #cd7f32; border: 1.5px solid rgba(205,127,50,0.4); }
+    .rank-badge.normal { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45); border: 1.5px solid rgba(255,255,255,0.1); }
+
+    .medal-icon { font-size: 1.15rem; }
+
+    /* ===== NAME CELL ===== */
+    .student-name {
+      font-weight: 600; color: #f1f5f9;
+    }
+    .row-gold   .student-name { color: #fde68a; }
+    .row-silver .student-name { color: #e2e8f0; }
+    .row-bronze .student-name { color: #fdba74; }
+
+    /* ===== SCORE BADGE ===== */
+    .score-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .3rem .75rem; border-radius: 999px;
+      font-size: .85rem; font-weight: 700; white-space: nowrap;
+    }
+    .score-green  { background: rgba(16,185,129,0.18); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .score-blue   { background: rgba(59,130,246,0.18); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .score-orange { background: rgba(249,115,22,0.18); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+    .score-red    { background: rgba(239,68,68,0.18);  color: #f87171; border: 1px solid rgba(239,68,68,0.3);  }
+
+    /* ===== SCORE DETAIL ===== */
+    .score-detail {
+      font-size: .8rem; color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+
+    /* ===== DURATION / DATE ===== */
+    .text-dim { color: rgba(255,255,255,0.4); font-size: .88rem; }
+    .text-dimmer { color: rgba(255,255,255,0.3); font-size: .82rem; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+    /* ===== FOOTER ===== */
+    .page-footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 1.5rem;
+      color: rgba(255,255,255,0.25);
+      font-size: .78rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .page-footer a {
+      color: rgba(255,255,255,0.35); text-decoration: none;
+    }
+    .page-footer a:hover { color: rgba(255,255,255,0.6); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .page-header { padding: 2rem 1rem 1.5rem; }
+      .col-hide { display: none; }
+      .leaderboard-table tbody td,
+      .leaderboard-table thead th { padding: .75rem .6rem; }
+      .leaderboard-table tbody td:first-child,
+      .leaderboard-table thead th:first-child { padding-left: 1rem; }
+      .leaderboard-table tbody td:last-child,
+      .leaderboard-table thead th:last-child  { padding-right: 1rem; }
+      .rank-badge { width: 30px; height: 30px; font-size: .8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-badge">
+      <span class="dot-pulse"></span>
+      ประกาศผลอย่างเป็นทางการ
+    </div>
+    <h1>
+      <i class="fas fa-graduation-cap" style="color:#60a5fa;margin-right:.4rem;"></i>
+      {{ config.subject_name }}
+      {% if config.year %}
+        <span>ปี {{ config.year }}</span>
+      {% endif %}
+    </h1>
+    <p class="subtitle">ประกาศผลการสอบ</p>
+    <div class="participants-badge">
+      <i class="fas fa-users" style="color:#60a5fa;"></i>
+      ผู้เข้าสอบทั้งหมด&nbsp;<strong>{{ total_participants }}</strong>&nbsp;คน
+    </div>
+  </div>
+
+  <!-- MAIN TABLE -->
+  <div class="main-container">
+    <div class="glass-table-wrap">
+      <div class="table-header-bar">
+        <i class="fas fa-trophy"></i>
+        ตาราง Leaderboard
+      </div>
+
+      {% if results %}
+      <div style="overflow-x:auto;">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th style="width:56px;text-align:center;">อันดับ</th>
+              <th>ชื่อ-นามสกุล</th>
+              <th style="text-align:center;">คะแนน</th>
+              <th style="text-align:center;" class="col-hide">ถูก/ทั้งหมด</th>
+              <th style="text-align:center;" class="col-hide">เวลา</th>
+              <th style="text-align:center;" class="col-hide">วันที่สอบ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in results %}
+            <tr class="{% if forloop.counter == 1 %}row-gold{% elif forloop.counter == 2 %}row-silver{% elif forloop.counter == 3 %}row-bronze{% endif %}">
+
+              <!-- อันดับ -->
+              <td style="text-align:center;">
+                {% if forloop.counter == 1 %}
+                  <span class="rank-badge gold">
+                    <i class="fas fa-medal medal-icon"></i>
+                  </span>
+                {% elif forloop.counter == 2 %}
+                  <span class="rank-badge silver">
+                    <i class="fas fa-medal medal-icon"></i>
+                  </span>
+                {% elif forloop.counter == 3 %}
+                  <span class="rank-badge bronze">
+                    <i class="fas fa-medal medal-icon"></i>
+                  </span>
+                {% else %}
+                  <span class="rank-badge normal">{{ forloop.counter }}</span>
+                {% endif %}
+              </td>
+
+              <!-- ชื่อ -->
+              <td>
+                <span class="student-name">
+                  {{ r.student }}
+                </span>
+              </td>
+
+              <!-- คะแนน -->
+              <td style="text-align:center;">
+                {% if r.score_pct >= 80 %}
+                  <span class="score-badge score-green">
+                    <i class="fas fa-star" style="font-size:.75rem;"></i>
+                    {{ r.score_pct|floatformat:1 }}%
+                  </span>
+                {% elif r.score_pct >= 60 %}
+                  <span class="score-badge score-blue">
+                    {{ r.score_pct|floatformat:1 }}%
+                  </span>
+                {% elif r.score_pct >= 40 %}
+                  <span class="score-badge score-orange">
+                    {{ r.score_pct|floatformat:1 }}%
+                  </span>
+                {% else %}
+                  <span class="score-badge score-red">
+                    {{ r.score_pct|floatformat:1 }}%
+                  </span>
+                {% endif %}
+              </td>
+
+              <!-- ถูก/ทั้งหมด -->
+              <td style="text-align:center;" class="col-hide">
+                <span class="score-detail">{{ r.correct }}/{{ r.total }}</span>
+              </td>
+
+              <!-- เวลาที่ใช้ -->
+              <td style="text-align:center;" class="col-hide">
+                {% if r.duration_min %}
+                  <span class="text-dim">
+                    <i class="fas fa-clock" style="font-size:.78rem;margin-right:.25rem;"></i>
+                    {{ r.duration_min }} นาที
+                  </span>
+                {% else %}
+                  <span class="text-dimmer">—</span>
+                {% endif %}
+              </td>
+
+              <!-- วันที่สอบ -->
+              <td style="text-align:center;" class="col-hide">
+                {% if r.exam_date %}
+                  <span class="text-dimmer">{{ r.exam_date }}</span>
+                {% else %}
+                  <span class="text-dimmer">—</span>
+                {% endif %}
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        ยังไม่มีผลการสอบในขณะนี้
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <i class="fas fa-graduation-cap mr-1" style="color:rgba(255,255,255,0.2);"></i>
+    ระบบสอบออนไลน์ &copy; {{ config.year|default:"2569" }}
+    &nbsp;&middot;&nbsp;
+    <a href="{% url 'home' %}">กลับหน้าหลัก</a>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}คลังข้อสอบ{% endblock %}
+{% block nav_questions %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-question-circle mr-2 text-info"></i>คลังข้อสอบ{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">คลังข้อสอบ</li>
+{% endblock %}
+
+{% block content %}
+  <!-- แถวที่ 1: ภาพรวมข้อสอบ -->
+  <div class="row">
+    <div class="col-lg-3 col-6" style="cursor:pointer;" onclick="filterQuestions('all')">
+      <div class="small-box bg-info" id="card-all">
+        <div class="inner">
+          <h3>{{ total }}</h3>
+          <p>ข้อสอบทั้งหมด <small>— ทั้งหมดที่มีในระบบ</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-layer-group"></i></div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6" style="cursor:pointer;" onclick="filterQuestions('has_answer')">
+      <div class="small-box bg-success" id="card-has_answer">
+        <div class="inner">
+          <h3>{{ has_answer }}</h3>
+          <p>มีเฉลยแล้ว <small>— พร้อมตรวจได้</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-check-circle"></i></div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6" style="cursor:pointer;" onclick="filterQuestions('no_answer')">
+      <div class="small-box bg-warning" id="card-no_answer">
+        <div class="inner">
+          <h3>{{ no_answer }}</h3>
+          <p>รอเฉลย <small>— ยังตรวจไม่ได้</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-exclamation-circle"></i></div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-primary">
+        <div class="inner">
+          <h3>{{ avg_b|floatformat:2 }}</h3>
+          <p>ความยากเฉลี่ย <small>— max {{ max_b|floatformat:2 }} / min {{ min_b|floatformat:2 }}</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-chart-line"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- แถวที่ 2: การกระจายความยาก -->
+  <div class="row">
+    <div class="col-lg-4 col-6" style="cursor:pointer;" onclick="filterQuestions('easy')">
+      <div class="small-box bg-success" id="card-easy">
+        <div class="inner">
+          <h3>{{ easy }}</h3>
+          <p>ข้อง่าย (b &lt; 0.8) <small>— นักเรียนส่วนใหญ่ทำได้</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-smile"></i></div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-6" style="cursor:pointer;" onclick="filterQuestions('medium')">
+      <div class="small-box bg-info" id="card-medium">
+        <div class="inner">
+          <h3>{{ medium }}</h3>
+          <p>ข้อกลาง (0.8–1.5) <small>— ระดับมาตรฐาน</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-meh"></i></div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-6" style="cursor:pointer;" onclick="filterQuestions('hard')">
+      <div class="small-box bg-danger" id="card-hard">
+        <div class="inner">
+          <h3>{{ hard }}</h3>
+          <p>ข้อยาก (b &#8805; 1.5) <small>— ต้องการทักษะสูง</small></p>
+        </div>
+        <div class="icon"><i class="fas fa-frown"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-info card-outline">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-question-circle mr-1"></i>ข้อสอบทั้งหมด ({{ questions|length }} ข้อ)
+        <span id="filter-badge" class="badge badge-info ml-2" style="display:none;font-size:.75rem;"></span>
+      </h3>
+      <div class="card-tools">
+        <a href="{% url 'questions:export_questions' %}?fmt=excel" class="btn btn-xs btn-success mr-1" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+        <a href="{% url 'questions:export_questions' %}?fmt=pdf" class="btn btn-xs btn-danger" title="Export PDF"><i class="fas fa-file-pdf"></i></a>
+      </div>
+    </div>
+    <div class="card-body">
+      <table id="questions-table" class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th style="width:60px;">ข้อที่</th>
+            <th>โจทย์</th>
+            <th style="width:80px;">ความยาก</th>
+            <th style="width:80px;">เฉลย</th>
+            <th style="width:80px;">สถานะ</th>
+            <th style="width:70px;">แก้ไข</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in questions %}
+          <tr style="cursor:pointer;" onclick="location.href='{% url 'questions:edit_question' q.pk %}'"
+            data-answer="{{ q.correct_answer|default:'' }}"
+            data-difficulty="{{ q.difficulty|default:'' }}">
+            <td class="text-center">{{ q.number }}</td>
+            <td>{{ q.body_clean|truncatechars:80 }}</td>
+            <td class="text-center">
+              {% if q.difficulty is not None %}
+                <span class="badge badge-info">{{ q.difficulty|floatformat:2 }}</span>
+              {% else %}<span class="text-muted">-</span>{% endif %}
+            </td>
+            <td class="text-center">
+              {% if q.correct_answer %}
+                <span class="badge badge-success">{{ q.correct_answer }}</span>
+              {% else %}<span class="text-muted">-</span>{% endif %}
+            </td>
+            <td class="text-center">
+              {% if q.is_active %}
+                <span class="badge badge-success">เปิด</span>
+              {% else %}
+                <span class="badge badge-danger">ปิด</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <a href="{% url 'questions:edit_question' q.pk %}" class="btn btn-xs btn-warning">
+                <i class="fas fa-edit"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">ยังไม่มีข้อสอบในระบบ</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var dt;
+var currentFilter = 'all';
+
+$.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+  if (settings.nTable.id !== 'questions-table') return true;
+  if (currentFilter === 'all') return true;
+
+  var nTr = settings.aoData[dataIndex].nTr;
+  var answer = nTr ? nTr.getAttribute('data-answer') || '' : '';
+  var difficulty = nTr ? parseFloat(nTr.getAttribute('data-difficulty')) : NaN;
+
+  if (currentFilter === 'has_answer') return answer !== '';
+  if (currentFilter === 'no_answer') return answer === '';
+  if (currentFilter === 'easy') return !isNaN(difficulty) && difficulty < 0.8;
+  if (currentFilter === 'medium') return !isNaN(difficulty) && difficulty >= 0.8 && difficulty < 1.5;
+  if (currentFilter === 'hard') return !isNaN(difficulty) && difficulty >= 1.5;
+  return true;
+});
+
+var filterLabels = {
+  'all':        { text: 'ทั้งหมด',       cls: 'badge-info' },
+  'has_answer': { text: 'มีเฉลยแล้ว',    cls: 'badge-success' },
+  'no_answer':  { text: 'รอเฉลย',        cls: 'badge-warning' },
+  'easy':       { text: 'ข้อง่าย',       cls: 'badge-success' },
+  'medium':     { text: 'ข้อกลาง',       cls: 'badge-info' },
+  'hard':       { text: 'ข้อยาก',        cls: 'badge-danger' },
+};
+
+function filterQuestions(type) {
+  currentFilter = type;
+  var allKeys = ['all','has_answer','no_answer','easy','medium','hard'];
+
+  // highlight active card
+  allKeys.forEach(function(k) {
+    var card = document.getElementById('card-' + k);
+    if (card) card.style.opacity = (type === 'all' || k === type) ? '1' : '0.5';
+  });
+
+  dt.draw();
+
+  // อัปเดต badge
+  var badge = document.getElementById('filter-badge');
+  if (type === 'all') {
+    badge.style.display = 'none';
+  } else {
+    var info = filterLabels[type];
+    badge.className = 'badge ml-2 ' + info.cls;
+    badge.style.display = 'inline-block';
+    var count = dt.rows({ filter: 'applied' }).count();
+    badge.textContent = 'กรอง: ' + info.text + ' — ' + count + ' ข้อ';
+  }
+
+}
+
+$(document).ready(function() {
+  dt = $('#questions-table').DataTable({
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Thai.json'
+    },
+    order: [[0, 'asc']],
+    pageLength: 25,
+    responsive: true,
+    columnDefs: [
+      { orderable: false, targets: [3, 5] }
+    ]
+  });
+});
+</script>
+{% endblock %}

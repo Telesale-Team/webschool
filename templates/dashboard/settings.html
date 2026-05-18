@@ -1,0 +1,262 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}ตั้งค่าระบบ{% endblock %}
+{% block nav_settings %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-cog mr-2 text-secondary"></i>ตั้งค่าระบบ{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">ตั้งค่าระบบ</li>
+{% endblock %}
+
+{% block content %}
+  {% if messages %}
+    {% for m in messages %}
+    <div class="alert alert-success alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      <i class="fas fa-check-circle mr-1"></i>{{ m }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+
+      <!-- ข้อมูลรายวิชา -->
+      <div class="col-12">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-book mr-1"></i>ข้อมูลรายวิชา</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>ชื่อรายวิชา <small class="text-muted">(แสดงบนหน้าสอบ)</small></label>
+              <input type="text" name="subject_name" class="form-control" value="{{ config.subject_name }}" placeholder="เช่น คณิตศาสตร์ ม.6" required>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <div class="form-group">
+                  <label>ปีการศึกษา</label>
+                  <input type="text" name="year" class="form-control" value="{{ config.year }}" placeholder="2569">
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label>จำนวนตัวเลือก</label>
+                  <select name="num_choices" class="form-control">
+                    <option value="4" {% if config.num_choices == 4 %}selected{% endif %}>4 ตัวเลือก</option>
+                    <option value="5" {% if config.num_choices == 5 %}selected{% endif %}>5 ตัวเลือก</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>
+                <i class="fas fa-clock mr-1 text-warning"></i>
+                เวลาสอบต่อข้อ (นาที)
+                <small class="text-muted">— 0 = ไม่จำกัดเวลา</small>
+              </label>
+              <div class="input-group">
+                <input type="number" name="time_limit" class="form-control" value="{% widthratio config.time_limit 60 1 %}" min="0" placeholder="0">
+                <div class="input-group-append"><span class="input-group-text">นาที/ข้อ</span></div>
+              </div>
+              <small class="text-muted">เช่น 1 = 1 นาทีต่อข้อ, 0 = ไม่มีการจับเวลา</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ประกาศผลการสอบ + รูปแบบการส่งข้อสอบ -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-success card-outline">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-bullhorn mr-1"></i>ประกาศผลการสอบ</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group mb-0">
+              <label><i class="fas fa-bullhorn mr-1 text-success"></i>สถานะการประกาศผล</label>
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="is_results_published"
+                       name="is_results_published" {% if config.is_results_published %}checked{% endif %}>
+                <label class="custom-control-label" for="is_results_published">
+                  {% if config.is_results_published %}
+                    <span class="text-success">เปิดประกาศผลแล้ว</span>
+                  {% else %}
+                    <span class="text-muted">ปิดอยู่ (ยังไม่ประกาศ)</span>
+                  {% endif %}
+                </label>
+              </div>
+              <small class="text-muted mt-2 d-block">
+                เมื่อเปิด ดูได้ที่ <a href="{% url 'public_results' %}" target="_blank">{% url 'public_results' %}</a>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card card-warning card-outline">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-sliders-h mr-1"></i>รูปแบบการส่งข้อสอบ</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label><i class="fas fa-list-ol mr-1 text-warning"></i>จำนวนข้อต่อครั้ง</label>
+              <div class="input-group">
+                <input type="number" name="questions_per_session" class="form-control"
+                       value="{{ config.questions_per_session }}" min="0" placeholder="0">
+                <div class="input-group-append"><span class="input-group-text">ข้อ</span></div>
+              </div>
+              <small class="text-muted">0 = ส่งทั้งหมดในครั้งเดียว</small>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-sort mr-1 text-warning"></i>ลำดับข้อสอบ</label>
+              <select name="question_order" class="form-control">
+                <option value="difficulty" {% if config.question_order == 'difficulty' %}selected{% endif %}>ง่าย → ยาก (ตาม b-parameter)</option>
+                <option value="random" {% if config.question_order == 'random' %}selected{% endif %}>สุ่มลำดับ</option>
+                <option value="sequential" {% if config.question_order == 'sequential' %}selected{% endif %}>ตามลำดับข้อ</option>
+              </select>
+            </div>
+            <div class="form-group mb-0">
+              <label><i class="fas fa-redo mr-1 text-warning"></i>การทำข้อสอบซ้ำ</label>
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="allow_retake"
+                       name="allow_retake" {% if config.allow_retake %}checked{% endif %}>
+                <label class="custom-control-label" for="allow_retake">
+                  {% if config.allow_retake %}
+                    <span class="text-success">เปิด — เริ่มนับ 1 ใหม่ทุกครั้ง</span>
+                  {% else %}
+                    <span class="text-muted">ปิด — ข้ามข้อที่เคยตอบแล้ว</span>
+                  {% endif %}
+                </label>
+              </div>
+              <small class="text-muted">เปิด = นักเรียนได้ทำข้อสอบชุดเดิมทุกครั้ง</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background Images -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-info card-outline">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-image mr-1"></i>รูป Background แต่ละหน้า</h3>
+            <div class="card-tools d-flex align-items-center">
+              <small class="text-muted mr-2">แนะนำ <strong>1920×1080px</strong> (16:9) · ไม่เกิน 2MB · JPG/PNG/WEBP</small>
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+
+              {% with pages=forloop.counter %}{% endwith %}
+
+              <!-- หน้าแรก -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-home mr-1"></i>หน้าแรก (Home)</label>
+                  {% if config.home_bg %}<img src="{{ config.home_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="home_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="home_bg" class="form-control form-control-sm" value="{{ config.home_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+              <!-- นักเรียน Login -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-user-graduate mr-1"></i>นักเรียน Login</label>
+                  {% if config.student_login_bg %}<img src="{{ config.student_login_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="student_login_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="student_login_bg" class="form-control form-control-sm" value="{{ config.student_login_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+              <!-- นักเรียน Register -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-user-graduate mr-1"></i>นักเรียน Register</label>
+                  {% if config.student_register_bg %}<img src="{{ config.student_register_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="student_register_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="student_register_bg" class="form-control form-control-sm" value="{{ config.student_register_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+              <!-- ครู Login -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-chalkboard-teacher mr-1"></i>ครู Login</label>
+                  {% if config.teacher_login_bg %}<img src="{{ config.teacher_login_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="teacher_login_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="teacher_login_bg" class="form-control form-control-sm" value="{{ config.teacher_login_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+              <!-- ครู Register -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-chalkboard-teacher mr-1"></i>ครู Register</label>
+                  {% if config.teacher_register_bg %}<img src="{{ config.teacher_register_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="teacher_register_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="teacher_register_bg" class="form-control form-control-sm" value="{{ config.teacher_register_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+              <!-- หน้าข้อสอบ -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label><i class="fas fa-pencil-alt mr-1"></i>หน้าข้อสอบ</label>
+                  {% if config.exam_bg %}<img src="{{ config.exam_bg }}" class="img-thumbnail mb-2 w-100" style="height:80px;object-fit:cover;">{% endif %}
+                  <input type="file" name="exam_bg_upload" class="form-control-file mb-1" accept="image/*">
+                  <small class="text-muted d-block mb-1">แนะนำ 1920×1080px · ไม่เกิน 2MB</small>
+                  <input type="url" name="exam_bg" class="form-control form-control-sm" value="{{ config.exam_bg }}" placeholder="หรือวาง URL รูป">
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Save Button -->
+    <div class="row">
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary btn-lg px-5">
+          <i class="fas fa-save mr-1"></i>บันทึกการตั้งค่าทั้งหมด
+        </button>
+        <a href="{% url 'questions:dashboard' %}" class="btn btn-secondary btn-lg ml-2">
+          ยกเลิก
+        </a>
+      </div>
+    </div>
+  </form>
+{% endblock %}

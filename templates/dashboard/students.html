@@ -1,0 +1,77 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}รายชื่อนักเรียน{% endblock %}
+{% block nav_students %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-users mr-2 text-success"></i>รายชื่อนักเรียน{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">รายชื่อนักเรียน</li>
+{% endblock %}
+
+{% block content %}
+  <div class="card card-success card-outline">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-users mr-1"></i>นักเรียนทั้งหมด ({{ students|length }} คน)</h3>
+      <div class="card-tools">
+        <a href="{% url 'questions:export_students' %}?fmt=excel" class="btn btn-xs btn-success mr-1" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+        <a href="{% url 'questions:export_students' %}?fmt=pdf" class="btn btn-xs btn-danger" title="Export PDF"><i class="fas fa-file-pdf"></i></a>
+      </div>
+    </div>
+    <div class="card-body">
+      <table id="students-table" class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th>เลขประจำตัว</th>
+            <th>ชื่อ</th>
+            <th>นามสกุล</th>
+            <th>ชั้นปี</th>
+            <th>เบอร์โทร</th>
+            <th>จำนวนครั้งที่สอบ</th>
+            <th>วันที่ลงทะเบียน</th>
+            <th style="width:120px;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr style="cursor:pointer;" onclick="location.href='{% url 'questions:student_detail' student.pk %}'">
+            <td>{{ student.student_id }}</td>
+            <td>{{ student.first_name }}</td>
+            <td>{{ student.last_name }}</td>
+            <td>{{ student.grade }}</td>
+            <td>{{ student.phone|default:"-" }}</td>
+            <td class="text-center">
+              <span class="badge badge-info">{{ student.exam_sessions_count }}</span>
+            </td>
+            <td>{{ student.created_at|date:"d/m/Y" }}</td>
+            <td class="text-center">
+              <a href="{% url 'questions:student_detail' student.pk %}" class="btn btn-xs btn-info mr-1" title="ดูคะแนน"><i class="fas fa-chart-bar"></i></a>
+              <a href="{% url 'questions:edit_student' student.pk %}" class="btn btn-xs btn-warning" title="แก้ไข"><i class="fas fa-edit"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">ยังไม่มีนักเรียนลงทะเบียน</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+  $('#students-table').DataTable({
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Thai.json'
+    },
+    order: [[6, 'desc']],
+    pageLength: 25,
+    responsive: true
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}สอบเสร็จแล้ว{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+{% block extra_css %}
+<style>
+  body { background:linear-gradient(135deg,#e0f2fe,#f0f9ff); min-height:100vh; }
+  .finish-card { max-width:480px; width:90%; background:#fff; border-radius:1.5rem; box-shadow:0 10px 40px rgba(59,130,246,0.12); padding:3rem; text-align:center; }
+</style>
+{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="finish-card">
+    <div style="font-size:4rem;color:#22c55e;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>
+    <h3 style="color:#1e3a5f;font-weight:700;">ทำข้อสอบเสร็จแล้ว!</h3>
+    <p class="text-muted mt-2">คุณ {{ student.first_name }} {{ student.last_name }}<br>ได้ทำข้อสอบครบทุกข้อแล้ว ระบบบันทึกคำตอบเรียบร้อย</p>
+    <div style="margin-top:2rem;">
+      <a href="{% url 'accounts:logout' %}" class="btn btn-primary btn-block" style="border-radius:999px;">ออกจากห้องสอบ</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

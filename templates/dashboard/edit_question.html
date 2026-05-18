@@ -1,0 +1,121 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}แก้ไขข้อที่ {{ question.number }}{% endblock %}
+{% block nav_questions %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-edit mr-2 text-warning"></i>แก้ไขข้อที่ {{ question.number }}{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'questions:question_list' %}">คลังข้อสอบ</a></li>
+  <li class="breadcrumb-item active">แก้ไขข้อที่ {{ question.number }}</li>
+{% endblock %}
+
+{% block content %}
+  {% if messages %}
+    {% for m in messages %}
+    <div class="alert alert-success alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      {{ m }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card card-warning card-outline">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-question-circle mr-1"></i>โจทย์คำถาม</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>คำถาม (ไม่รวมตัวเลือก)</label>
+              <textarea name="stem" class="form-control" rows="5" placeholder="ข้อความคำถาม">{{ question.stem|default:question.body }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-info card-outline">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-list-ol mr-1"></i>ตัวเลือก 1–5</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>ตัวเลือกที่ 1</label>
+              <input type="text" name="choice_1" class="form-control"
+                     value="{{ choices.1|default:'' }}"
+                     placeholder="ข้อความตัวเลือกที่ 1">
+            </div>
+            <div class="form-group">
+              <label>ตัวเลือกที่ 2</label>
+              <input type="text" name="choice_2" class="form-control"
+                     value="{{ choices.2|default:'' }}"
+                     placeholder="ข้อความตัวเลือกที่ 2">
+            </div>
+            <div class="form-group">
+              <label>ตัวเลือกที่ 3</label>
+              <input type="text" name="choice_3" class="form-control"
+                     value="{{ choices.3|default:'' }}"
+                     placeholder="ข้อความตัวเลือกที่ 3">
+            </div>
+            <div class="form-group">
+              <label>ตัวเลือกที่ 4</label>
+              <input type="text" name="choice_4" class="form-control"
+                     value="{{ choices.4|default:'' }}"
+                     placeholder="ข้อความตัวเลือกที่ 4">
+            </div>
+            <div class="form-group">
+              <label>ตัวเลือกที่ 5</label>
+              <input type="text" name="choice_5" class="form-control"
+                     value="{{ choices.5|default:'' }}"
+                     placeholder="ข้อความตัวเลือกที่ 5">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-success card-outline">
+          <div class="card-header"><h3 class="card-title">การตั้งค่า</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>ข้อที่</label>
+              <input type="text" class="form-control" value="{{ question.number }}" readonly>
+            </div>
+            <div class="form-group">
+              <label>เฉลย (1-5)</label>
+              <input type="text" name="correct_answer" class="form-control" value="{{ question.correct_answer }}" placeholder="1">
+            </div>
+            <div class="form-group">
+              <label>ความยาก</label>
+              <input type="text" class="form-control" value="{{ question.difficulty|default:'-' }}" readonly>
+            </div>
+            <div class="form-group">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" {% if question.is_active %}checked{% endif %}>
+                <label class="custom-control-label" for="is_active">เปิดใช้งาน</label>
+              </div>
+            </div>
+            {% if question.image %}
+            <div class="form-group">
+              <label>รูปภาพปัจจุบัน</label>
+              <div>
+                <img src="{{ question.image.url }}" class="img-thumbnail" style="max-height:200px;">
+              </div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+              <label><i class="fas fa-image mr-1"></i>รูปภาพประกอบ</label>
+              <input type="file" name="image" class="form-control-file" accept="image/*">
+              <small class="text-muted">เว้นว่างถ้าไม่ต้องการเปลี่ยนรูป</small>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-warning btn-block btn-lg">
+          <i class="fas fa-save mr-1"></i>บันทึกการแก้ไข
+        </button>
+        <a href="{% url 'questions:question_list' %}" class="btn btn-secondary btn-block mt-2">
+          ยกเลิก
+        </a>
+      </div>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,343 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ยินดีต้อนรับสู่ห้องสอบออนไลน์{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+
+{% block extra_css %}
+<style>
+  html, body { height: 100%; margin: 0; overflow-x: hidden; }
+
+  /* ===== HERO BG ===== */
+  .hero {
+    min-height: 100vh;
+    background:
+      linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(30,58,95,0.6) 50%, rgba(15,23,42,0.75) 100%),
+      url('{% if config.home_bg %}{{ config.home_bg }}{% else %}https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1800&q=85{% endif %}')
+      center/cover fixed no-repeat;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; position: relative;
+  }
+
+  /* floating particles effect */
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ===== NAVBAR TOP ===== */
+  .top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 2.5rem;
+    background: rgba(15,23,42,0.5);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .top-nav .brand {
+    display: flex; align-items: center; gap: .6rem;
+    color: #fff; font-size: 1rem; font-weight: 700; text-decoration: none;
+  }
+  .top-nav .brand .dot { color: #60a5fa; }
+  .top-nav .nav-links { display: flex; align-items: center; gap: .6rem; }
+  .top-nav .nav-links a,
+  .top-nav .nav-links button {
+    color: rgba(255,255,255,0.75); font-size: .88rem;
+    text-decoration: none; font-weight: 500;
+    padding: .45rem 1rem; border-radius: 999px;
+    border: none; background: transparent; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-family: inherit; line-height: 1;
+  }
+  .top-nav .nav-links a:hover,
+  .top-nav .nav-links button:hover { color: #fff; background: rgba(255,255,255,0.1); }
+  .top-nav .nav-links .btn-nav {
+    background: #3b82f6; color: #fff !important;
+    box-shadow: 0 2px 12px rgba(59,130,246,0.4);
+  }
+  .top-nav .nav-links .btn-nav:hover { background: #2563eb; box-shadow: 0 4px 16px rgba(59,130,246,0.5); }
+
+  /* ===== PREMIUM RESULT NOTIFICATION ===== */
+  .nav-notify { position: relative; }
+
+  .nav-notify.published {
+    background: linear-gradient(135deg, rgba(251,191,36,0.18), rgba(245,158,11,0.12)) !important;
+    border: 1px solid rgba(251,191,36,0.45) !important;
+    color: #fde68a !important;
+    box-shadow: 0 0 16px rgba(251,191,36,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .nav-notify.published::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2.8s infinite;
+  }
+  @keyframes shimmer {
+    0% { left: -100%; }
+    60%, 100% { left: 160%; }
+  }
+  .nav-notify.published:hover {
+    background: linear-gradient(135deg, rgba(251,191,36,0.28), rgba(245,158,11,0.2)) !important;
+    box-shadow: 0 0 24px rgba(251,191,36,0.4), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+  }
+  .nav-notify.published .live-badge {
+    font-size: .65rem; font-weight: 700; letter-spacing: .05em;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a1200;
+    padding: .15rem .4rem; border-radius: 999px;
+    text-transform: uppercase;
+    box-shadow: 0 1px 6px rgba(251,191,36,0.5);
+  }
+
+  /* ===== HERO CONTENT ===== */
+  .hero-content {
+    text-align: center; max-width: 680px; width: 100%;
+    position: relative; z-index: 1; margin-top: 4rem;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(59,130,246,0.2);
+    border: 1px solid rgba(59,130,246,0.4);
+    border-radius: 999px; padding: .35rem 1rem;
+    color: #93c5fd; font-size: .82rem; font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge .pulse {
+    width: 7px; height: 7px; background: #60a5fa;
+    border-radius: 50%; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(1.4); }
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800; color: #fff; line-height: 1.2;
+    margin-bottom: 1rem; text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .hero-title span { color: #60a5fa; }
+  .hero-sub {
+    font-size: 1.05rem; color: rgba(255,255,255,0.7);
+    margin-bottom: 2.5rem; line-height: 1.7;
+  }
+
+  /* ===== GLASS CARD ===== */
+  .glass-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 1.5rem; padding: 2rem 2.5rem;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    max-width: 480px; width: 100%; margin: 0 auto 1.5rem;
+  }
+
+  .btn-guide {
+    display: flex; align-items: center; justify-content: center; gap: .75rem;
+    width: 100%; padding: .95rem;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: .9rem; color: #fff;
+    font-size: 1rem; font-weight: 600; text-decoration: none;
+    transition: all .2s; margin-bottom: .9rem;
+  }
+  .btn-guide:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.4);
+    color: #fff; transform: translateY(-1px);
+  }
+  .btn-guide .icon-wrap {
+    width: 36px; height: 36px; background: rgba(255,255,255,0.15);
+    border-radius: .5rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .btn-enter {
+    display: flex; align-items: center; justify-content: center; gap: .75rem;
+    width: 100%; padding: .95rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: none; border-radius: .9rem; color: #fff;
+    font-size: 1rem; font-weight: 700; text-decoration: none;
+    transition: all .2s;
+    box-shadow: 0 6px 24px rgba(59,130,246,0.5);
+  }
+  .btn-enter:hover {
+    color: #fff; transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(59,130,246,0.6);
+  }
+  .btn-enter .icon-wrap {
+    width: 36px; height: 36px; background: rgba(255,255,255,0.2);
+    border-radius: .5rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .btn-enter .arrow { margin-left: auto; opacity: .7; }
+
+  /* ===== STATS ROW ===== */
+  .stats-row {
+    display: flex; justify-content: center; gap: 2.5rem;
+    margin-top: 2.5rem;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .num { font-size: 1.6rem; font-weight: 800; color: #fff; }
+  .stat-item .lbl { font-size: .78rem; color: rgba(255,255,255,0.55); margin-top: .1rem; }
+  .stat-divider { width: 1px; background: rgba(255,255,255,0.12); align-self: stretch; }
+
+  /* ===== GUIDE MODAL ===== */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65); z-index: 9999;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-box {
+    background: #1e293b; border: 1px solid #334155;
+    border-radius: 1.5rem; max-width: 480px; width: 90%;
+    padding: 2.5rem; position: relative;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .modal-close {
+    position: absolute; top: 1.1rem; right: 1.1rem;
+    background: #334155; border: none; color: #94a3b8;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 1.1rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #475569; color: #fff; }
+  .modal-box h4 { color: #f1f5f9; font-weight: 700; font-size: 1.15rem; margin-bottom: 1.5rem; }
+  .modal-box ol { color: #94a3b8; line-height: 2.2; padding-left: 1.4rem; }
+  .modal-box ol strong { color: #e2e8f0; }
+  .modal-tip {
+    margin-top: 1.5rem; padding: 1rem;
+    background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
+    border-radius: .75rem; color: #93c5fd; font-size: .88rem;
+  }
+
+  /* ===== FOOTER ===== */
+  .hero-footer {
+    position: absolute; bottom: 1.5rem; left: 0; right: 0;
+    text-align: center; color: rgba(255,255,255,0.3);
+    font-size: .78rem;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{% if messages %}
+<div style="position:fixed;top:5rem;right:1rem;z-index:9998;max-width:320px;">
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" style="border-radius:.75rem;">
+    {{ message }}<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <a href="{% url 'home' %}" class="brand">
+    <i class="fas fa-graduation-cap" style="color:#60a5fa;font-size:1.1rem;"></i>
+    ห้องสอบ<span class="dot">ออนไลน์</span>
+  </a>
+  <div class="nav-links">
+    <a href="{% url 'public_results' %}" class="nav-notify{% if config.is_results_published %} published{% endif %}">
+      <i class="fas fa-trophy"></i>
+      ประกาศผลสอบ
+      {% if config.is_results_published %}<span class="live-badge">Live</span>{% endif %}
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+
+    <!-- Badge -->
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      ระบบพร้อมใช้งาน · ปีการศึกษา 2569
+    </div>
+
+    <!-- Title -->
+    <h1 class="hero-title">
+      ยินดีต้อนรับสู่<br>
+      <span>ห้องสอบออนไลน์</span>
+    </h1>
+    <p class="hero-sub">
+      ข้อสอบ Random เรียงตามระดับความยาก<br>
+      ทำข้อสอบได้ทุกที่ทุกเวลา ผลส่งตรงถึงครูทันที
+    </p>
+
+    <!-- Glass Card -->
+    <div class="glass-card">
+      <a href="#" class="btn-guide" onclick="document.getElementById('guide-modal').style.display='flex'; return false;">
+        <div class="icon-wrap"><i class="fas fa-book-open"></i></div>
+        เริ่มต้นคู่มือทำข้อสอบ
+      </a>
+      <a href="{% url 'accounts:student_login' %}" class="btn-enter">
+        <div class="icon-wrap"><i class="fas fa-sign-in-alt"></i></div>
+        Login เข้าสู่ห้องสอบ
+        <i class="fas fa-arrow-right arrow"></i>
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="num">163+</div>
+        <div class="lbl">ข้อสอบในระบบ</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="num">4</div>
+        <div class="lbl">หมวดวิชา</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="num">Easy→Hard</div>
+        <div class="lbl">เรียงตามความยาก</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-footer">
+    <span style="opacity:.5;">Developed by</span>
+    <a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none;font-weight:600;">NoodeeBootbiz.ai</a>
+    &nbsp;·&nbsp;
+    Photo by <a href="https://unsplash.com" style="color:inherit;text-decoration:underline;">Unsplash</a>
+    &nbsp;·&nbsp;
+    ระบบสอบออนไลน์ &copy; 2569
+  </div>
+</div>
+
+<!-- GUIDE MODAL -->
+<div id="guide-modal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('guide-modal').style.display='none'">
+      <i class="fas fa-times"></i>
+    </button>
+    <h4><i class="fas fa-book-open text-primary mr-2"></i>คู่มือทำข้อสอบ</h4>
+    <ol>
+      <li>กดปุ่ม <strong>"Login เข้าสู่ห้องสอบ"</strong></li>
+      <li>ป้อนเลขประจำตัวนักเรียนและรหัสผ่าน</li>
+      <li>ระบบจะแสดงข้อสอบทีละ 1 ข้อ เรียงจากง่ายไปยาก</li>
+      <li>เลือกคำตอบที่ถูกต้อง แล้วกดปุ่ม <strong>"ยืนยันคำตอบ"</strong></li>
+      <li>ทำจนครบทุกข้อ ระบบบันทึกผลให้อัตโนมัติ</li>
+    </ol>
+    <div class="modal-tip">
+      <i class="fas fa-info-circle mr-1"></i>
+      หากยังไม่มีบัญชี กรุณาติดต่อครูผู้สอนเพื่อ<a href="{% url 'accounts:student_register' %}" style="color:#60a5fa;">ลงทะเบียน</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

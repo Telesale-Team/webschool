@@ -1,0 +1,174 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}ครู — เข้าสู่ระบบ{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+
+{% block extra_css %}
+<style>
+  html, body { height: 100%; margin: 0; }
+  .split-page { display: flex; min-height: 100vh; }
+
+  .split-image {
+    flex: 1.1; position: relative; overflow: hidden; display: none;
+  }
+  @media (min-width: 768px) { .split-image { display: block; } }
+  .split-image img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .split-image .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg,
+      rgba(15,23,42,0.75) 0%,
+      rgba(30,58,95,0.55) 60%,
+      rgba(59,130,246,0.3) 100%);
+  }
+  .split-image .caption {
+    position: absolute; bottom: 2.5rem; left: 2.5rem; right: 2.5rem; color: #fff;
+  }
+  .split-image .caption h2 { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+  .split-image .caption p { font-size: 1rem; opacity: .85; }
+  .split-image .logo-badge {
+    position: absolute; top: 2rem; left: 2rem;
+    display: flex; align-items: center; gap: .6rem;
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+    padding: .45rem 1.1rem; color: #fff; font-weight: 600; font-size: .95rem;
+  }
+
+  .split-form {
+    flex: .9; display: flex; align-items: center; justify-content: center;
+    background: #0f172a; padding: 2rem; min-height: 100vh;
+  }
+  .form-box { width: 100%; max-width: 400px; }
+  .form-box .brand { text-align: center; margin-bottom: 2rem; }
+  .form-box .brand .icon-circle {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg,#6366f1,#4f46e5);
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.4); margin-bottom: 1rem;
+  }
+  .form-box .brand h3 { font-size: 1.5rem; font-weight: 700; color: #f1f5f9; }
+  .form-box .brand p { color: #94a3b8; font-size: .9rem; }
+
+  .form-card {
+    background: #1e293b; border-radius: 1.25rem;
+    padding: 2rem; border: 1px solid #334155;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.3);
+  }
+  .form-card .form-label { font-size: .85rem; font-weight: 600; color: #94a3b8; margin-bottom: .35rem; }
+  .form-card .form-control {
+    background: #0f172a; border: 1.5px solid #334155; color: #f1f5f9;
+    border-radius: .6rem; padding: .65rem 1rem; font-size: .95rem;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .form-card .form-control:focus {
+    border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+    outline: none; background: #0f172a; color: #f1f5f9;
+  }
+  .form-card .form-control::placeholder { color: #475569; }
+  .btn-login {
+    width: 100%; background: linear-gradient(135deg,#6366f1,#4f46e5);
+    color: #fff; border: none; border-radius: .75rem;
+    padding: .8rem; font-size: 1rem; font-weight: 600; margin-top: .5rem;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,102,241,0.5); }
+
+  .demo-box {
+    background: rgba(245,158,11,0.1); border: 1.5px dashed #f59e0b;
+    border-radius: .75rem; padding: .75rem 1rem; margin-bottom: 1.25rem;
+  }
+  .demo-box p { font-size: .78rem; color: #fcd34d; font-weight: 600; margin-bottom: .4rem; }
+  .btn-demo {
+    width: 100%; background: #f59e0b; color: #fff; border: none;
+    border-radius: .5rem; padding: .5rem; font-size: .88rem; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-demo:hover { background: #d97706; }
+
+  .divider { border-top: 1px solid #334155; margin: 1.25rem 0; }
+  .link-row { text-align: center; font-size: .88rem; }
+  .link-row a { color: #6366f1; font-weight: 600; text-decoration: none; }
+  .link-row .back { color: #475569; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="split-page">
+
+  <!-- LEFT: Image Panel -->
+  <div class="split-image">
+    <img src="{% if config.teacher_login_bg %}{{ config.teacher_login_bg }}{% else %}https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1400&q=85{% endif %}" alt="teacher classroom">
+    <div class="overlay"></div>
+    <div class="logo-badge">
+      <i class="fas fa-chalkboard-teacher"></i> ครูผู้สอน
+    </div>
+    <div class="caption">
+      <h2>ยินดีต้อนรับ<br>ครูผู้สอน</h2>
+      <p>จัดการข้อสอบ ติดตามผลนักเรียน<br>และดูรายงานได้ทุกที่ทุกเวลา</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form Panel (dark theme) -->
+  <div class="split-form">
+    <div class="form-box">
+      <div class="brand">
+        <div class="icon-circle">
+          <i class="fas fa-chalkboard-teacher" style="color:#fff;font-size:1.6rem;"></i>
+        </div>
+        <h3>ครูผู้สอน — เข้าสู่ระบบ</h3>
+        <p>จัดการห้องสอบและดูรายงานผลนักเรียน</p>
+      </div>
+
+      {% if messages %}
+        {% for m in messages %}
+        <div class="alert alert-danger rounded-lg mb-3" style="background:#450a0a;border:1px solid #991b1b;color:#fca5a5;">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Demo Box -->
+      <div class="demo-box">
+        <p><i class="fas fa-flask mr-1"></i>Demo — กดเพื่อใส่ข้อมูลทดสอบ</p>
+        <button type="button" class="btn-demo" onclick="fillTeacherDemo()">
+          <i class="fas fa-bolt mr-1"></i>ครู Demo (0812345678 / teacher1234)
+        </button>
+      </div>
+
+      <div class="form-card">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">เบอร์โทรศัพท์</label>
+            <input id="f-phone" type="text" name="phone" class="form-control"
+                   placeholder="กรอกเบอร์โทรศัพท์" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">รหัสผ่าน</label>
+            <input id="f-pwd" type="password" name="password" class="form-control"
+                   placeholder="กรอกรหัสผ่าน" required>
+          </div>
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt mr-1"></i>เข้าสู่ระบบ
+          </button>
+        </form>
+      </div>
+
+      <div class="divider"></div>
+      <div class="link-row">
+        <a href="{% url 'accounts:teacher_register' %}">ลงทะเบียนครูใหม่</a>
+        &nbsp;·&nbsp;
+        <a href="{% url 'home' %}" class="back">← กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fillTeacherDemo() {
+  document.getElementById('f-phone').value = '0812345678';
+  document.getElementById('f-pwd').value = 'teacher1234';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}แก้ไขข้อมูลนักเรียน — {{ student.first_name }} {{ student.last_name }}{% endblock %}
+{% block nav_students %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-user-edit mr-2 text-warning"></i>แก้ไขข้อมูลนักเรียน{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'questions:student_list' %}">รายชื่อนักเรียน</a></li>
+  <li class="breadcrumb-item active">แก้ไข</li>
+{% endblock %}
+
+{% block content %}
+  {% if messages %}
+    {% for m in messages %}
+    <div class="alert alert-success alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      {{ m }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="card card-warning card-outline">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-user-edit mr-1"></i>{{ student.first_name }} {{ student.last_name }} ({{ student.student_id }})</h3>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>ชื่อ</label>
+                  <input type="text" name="first_name" class="form-control" value="{{ student.first_name }}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>นามสกุล</label>
+                  <input type="text" name="last_name" class="form-control" value="{{ student.last_name }}" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>เบอร์โทรศัพท์</label>
+                  <input type="text" name="phone" class="form-control" value="{{ student.phone|default:'' }}" placeholder="เบอร์โทร">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>ชั้นปี</label>
+                  <input type="text" name="grade" class="form-control" value="{{ student.grade|default:'' }}" placeholder="เช่น ม.6/1">
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h6 class="text-muted mb-3"><i class="fas fa-lock mr-1"></i>เปลี่ยนรหัสผ่าน (เว้นว่างหากไม่ต้องการเปลี่ยน)</h6>
+            <div class="form-group">
+              <label>รหัสผ่านใหม่</label>
+              <input type="password" name="new_password" class="form-control" placeholder="กรอกรหัสผ่านใหม่ (ไม่บังคับ)" autocomplete="new-password">
+              <small class="form-text text-muted">หากเว้นว่างไว้ รหัสผ่านจะไม่ถูกเปลี่ยน</small>
+            </div>
+
+            <div class="mt-3">
+              <button type="submit" class="btn btn-warning btn-lg mr-2">
+                <i class="fas fa-save mr-1"></i>บันทึกการแก้ไข
+              </button>
+              <a href="{% url 'questions:student_list' %}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-times mr-1"></i>ยกเลิก
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

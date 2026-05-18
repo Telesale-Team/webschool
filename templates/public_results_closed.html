@@ -1,0 +1,194 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ยังไม่เปิดประกาศผล — {{ config.subject_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #0a0f1e 0%, #0d1b3e 35%, #0f2551 60%, #0a0f1e 100%);
+      background-attachment: fixed;
+      color: #e2e8f0;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 15% 40%, rgba(59,130,246,0.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(99,102,241,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .page-wrap {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    /* ===== MAIN CARD ===== */
+    .closed-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 2rem;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+      padding: 3.5rem 3rem;
+      text-align: center;
+      max-width: 480px; width: 100%;
+    }
+
+    /* ===== LOCK ICON ===== */
+    .lock-wrap {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 100px; height: 100px;
+      background: rgba(59,130,246,0.1);
+      border: 2px solid rgba(59,130,246,0.25);
+      border-radius: 50%;
+      margin-bottom: 2rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    .lock-wrap i {
+      font-size: 2.8rem;
+      color: #60a5fa;
+      filter: drop-shadow(0 0 16px rgba(96,165,250,0.5));
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    /* ===== SUBJECT BADGE ===== */
+    .subject-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 999px; padding: .35rem 1rem;
+      color: #93c5fd; font-size: .82rem; font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    .closed-card h1 {
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 800; color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      margin-bottom: .75rem; line-height: 1.3;
+    }
+
+    .closed-card .desc {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 0 0 1.75rem;
+    }
+
+    /* ===== TIP BOX ===== */
+    .tip-box {
+      display: flex; align-items: flex-start; gap: .75rem;
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 1rem; padding: 1rem 1.2rem;
+      text-align: left; margin-bottom: 1.75rem;
+    }
+    .tip-box i {
+      color: #fbbf24; font-size: 1rem; flex-shrink: 0; margin-top: .1rem;
+    }
+    .tip-box span {
+      font-size: .88rem; color: rgba(255,255,255,0.55); line-height: 1.6;
+    }
+
+    /* ===== BACK BUTTON ===== */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: .6rem;
+      padding: .75rem 1.75rem;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: .9rem; color: rgba(255,255,255,0.7);
+      font-family: 'Sarabun', sans-serif;
+      font-size: .95rem; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-back:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.3);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* ===== FOOTER ===== */
+    .page-footer {
+      position: absolute; bottom: 1.5rem; left: 0; right: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.2);
+      font-size: .76rem;
+    }
+    .page-footer a {
+      color: rgba(255,255,255,0.25); text-decoration: none;
+    }
+    .page-footer a:hover { color: rgba(255,255,255,0.5); }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div class="closed-card">
+
+    <!-- Lock Icon -->
+    <div class="lock-wrap">
+      <i class="fas fa-lock"></i>
+    </div>
+
+    <!-- Subject Badge -->
+    <div class="subject-badge">
+      <i class="fas fa-graduation-cap"></i>
+      {{ config.subject_name }}{% if config.year %} &middot; ปี {{ config.year }}{% endif %}
+    </div>
+
+    <h1>ยังไม่เปิดประกาศผลการสอบ</h1>
+    <p class="desc">
+      ผลการสอบวิชานี้ยังไม่ได้รับการเผยแพร่<br>
+      กรุณารอการประกาศจากอาจารย์ผู้สอน
+    </p>
+
+    <hr class="divider">
+
+    <!-- Tip -->
+    <div class="tip-box">
+      <i class="fas fa-bell"></i>
+      <span>กรุณาติดตามประกาศจากอาจารย์ผู้สอน เมื่อผลการสอบพร้อมแล้ว จะสามารถดูได้ที่หน้านี้</span>
+    </div>
+
+    <!-- Back -->
+    <a href="{% url 'home' %}" class="btn-back">
+      <i class="fas fa-arrow-left"></i>
+      กลับหน้าหลัก
+    </a>
+
+  </div>
+
+  <footer class="page-footer">
+    <i class="fas fa-graduation-cap mr-1" style="color:rgba(255,255,255,0.15);"></i>
+    ระบบสอบออนไลน์ &copy; {{ config.year|default:"2569" }}
+  </footer>
+
+</div>
+</body>
+</html>

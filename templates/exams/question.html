@@ -1,0 +1,296 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}ข้อที่ {{ current }} — ห้องสอบ{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+
+{% block extra_css %}
+<style>
+  body {
+    min-height: 100vh;
+    background:
+      linear-gradient(135deg, rgba(15,23,42,0.62) 0%, rgba(30,58,95,0.55) 100%),
+      url('{% if config.exam_bg %}{{ config.exam_bg }}{% else %}https://images.unsplash.com/photo-1456324504439-367cee3b3c32?auto=format&fit=crop&w=1600&q=80{% endif %}')
+      center/cover fixed no-repeat;
+  }
+  .exam-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+
+  /* ===== HEADER ===== */
+  .exam-header { text-align: center; margin-bottom: 1.5rem; position: relative; width: 100%; max-width: 700px; }
+  .exam-header .header-icon {
+    width: 56px; height: 56px; background: #fff; border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.18);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 0.75rem;
+    border: 3px solid #dbeafe;
+  }
+  .exam-header h1 { font-size: 1.9rem; font-weight: 700; color: #fff; margin: 0; text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .exam-header h1 span { color: #93c5fd; }
+  .year-badge {
+    display: inline-block; background: #ef4444; color: #fff;
+    font-size: 1rem; font-weight: 700; padding: 0.2rem 0.9rem;
+    border-radius: 999px; transform: rotate(3deg);
+    box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+    margin-top: 0.4rem;
+  }
+  .student-badge {
+    position: absolute; top: 0; right: 0;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 999px; padding: 0.3rem 0.9rem;
+    font-size: 0.82rem; color: #fff; text-decoration: none;
+  }
+  .student-badge:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+  /* ===== MAIN CARD ===== */
+  .exam-card {
+    max-width: 700px; width: 100%;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 2rem;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.3);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    padding: 2rem 2rem 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .exam-card::before {
+    content: '\e3c9';
+    font-family: 'Material Icons';
+    position: absolute; top: -12px; right: -12px;
+    font-size: 100px; color: #3b82f6; opacity: 0.07;
+    transform: rotate(10deg); pointer-events: none;
+  }
+
+  /* progress */
+  .progress { height: 7px; border-radius: 999px; background: #e0f2fe; margin-bottom: 1.5rem; }
+  .progress-bar { background: linear-gradient(90deg,#3b82f6,#60a5fa); border-radius: 999px; transition: width .4s; }
+  .progress-label { font-size: 0.82rem; color: #64748b; margin-bottom: 0.4rem; text-align: right; }
+
+  /* question box */
+  .question-box {
+    background: #f0f9ff; border: 1.5px solid #bfdbfe;
+    border-radius: 1rem; padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .question-box .q-body {
+    font-size: 1.08rem; font-weight: 600; color: #1e3a5f;
+    line-height: 1.8; white-space: pre-line;
+  }
+  .question-box .q-num {
+    color: #3b82f6; font-size: 1.2rem; font-weight: 800; margin-right: 0.4rem;
+  }
+
+  /* choices */
+  .choice-label { display: block; cursor: pointer; margin-bottom: 0.7rem; }
+  .choice-label input[type=radio] { display: none; }
+  .choice-row {
+    display: flex; align-items: stretch;
+    border-radius: 0.75rem; overflow: hidden;
+    border: 2px solid #e2e8f0;
+    transition: border-color .15s, box-shadow .15s;
+    background: #fff;
+  }
+  .choice-row:hover { border-color: #93c5fd; box-shadow: 0 2px 12px rgba(59,130,246,0.1); }
+  .choice-num {
+    min-width: 52px; background: linear-gradient(160deg,#60a5fa,#3b82f6);
+    color: #fff; font-size: 1.2rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.9rem 0;
+  }
+  .choice-text {
+    flex: 1; padding: 0.9rem 1rem;
+    font-size: 0.98rem; color: #334155;
+    display: flex; align-items: center;
+  }
+  input[type=radio]:checked ~ .choice-row {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  input[type=radio]:checked ~ .choice-row .choice-num {
+    background: linear-gradient(160deg,#1d4ed8,#3b82f6);
+  }
+  input[type=radio]:checked ~ .choice-row .choice-text {
+    color: #1d4ed8; font-weight: 600;
+  }
+
+  /* submit */
+  .btn-submit {
+    width: 100%; margin-top: 1.25rem;
+    background: #3b82f6; color: #fff; border: none;
+    padding: 0.9rem; border-radius: 999px;
+    font-size: 1.05rem; font-weight: 600;
+    transition: background .15s, transform .1s;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+  }
+  .btn-submit:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-submit:disabled { background: #93c5fd; transform: none; cursor: not-allowed; }
+
+  /* exit link */
+  .exit-link { text-align: center; margin-top: 1rem; }
+  .exit-link a { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-decoration: none; }
+  .exit-link a:hover { color: #fca5a5; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="exam-page">
+
+  <!-- HEADER -->
+  <div class="exam-header">
+    <a href="{% url 'accounts:logout' %}" class="student-badge">
+      <i class="fas fa-user-circle mr-1"></i>{{ student.first_name }} {{ student.last_name }}
+    </a>
+    <div class="header-icon">
+      <i class="fas fa-graduation-cap" style="color:#3b82f6;font-size:1.5rem;"></i>
+    </div>
+    <h1>{{ config.subject_name|default:"ห้องสอบออนไลน์" }}</h1>
+    <div><span class="year-badge">{{ config.year|default:"2569" }}</span></div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="exam-card">
+
+    <!-- Progress -->
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <small class="text-muted">ข้อที่ {{ current }} จาก {{ total }} ข้อ</small>
+      <small style="color:#3b82f6;font-weight:700;font-variant-numeric:tabular-nums;">
+        <i class="fas fa-stopwatch mr-1"></i><span id="elapsed-text">00:00</span>
+      </small>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" style="width:{{ progress_pct }}%"></div>
+    </div>
+
+    {% if time_limit > 0 %}
+    <div id="timer-wrap" class="text-center mb-3">
+      <span id="timer-display" style="font-size:1.4rem;font-weight:800;color:#1e3a5f;font-variant-numeric:tabular-nums;">
+        <i class="fas fa-clock mr-1" style="color:#3b82f6;"></i>
+        <span id="timer-text">--:--</span>
+      </span>
+    </div>
+    {% endif %}
+
+    <!-- Question Box -->
+    <div class="question-box">
+      <div class="q-body">
+        {{ question.stem|default:question.body_clean }}
+      </div>
+      {% if question.image %}
+      <div class="text-center mt-3">
+        <img src="{{ question.image.url }}"
+             alt="รูปประกอบข้อที่ {{ question.number }}"
+             class="img-fluid rounded"
+             style="max-height:300px; object-fit:contain;">
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Choices Form -->
+    <form method="post" id="exam-form">
+      {% csrf_token %}
+      {% for choice in choices %}
+      <label class="choice-label">
+        <input type="radio" name="answer" value="{{ choice.number }}" required>
+        <div class="choice-row">
+          <div class="choice-num">{{ choice.number }}</div>
+          <div class="choice-text">
+            {% if choice.body %}{{ choice.body }}{% else %}ตัวเลือกที่ {{ choice.number }}{% endif %}
+          </div>
+        </div>
+      </label>
+      {% endfor %}
+      <button type="submit" class="btn-submit" id="submit-btn" disabled>
+        ยืนยันคำตอบ &nbsp;<i class="fas fa-arrow-right"></i>
+      </button>
+    </form>
+
+  </div>
+
+  <!-- Exit -->
+  <div class="exit-link">
+    <a href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt mr-1"></i>ออกจากห้องสอบ</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if time_limit > 0 %}
+<script>
+(function(){
+  var seconds = {{ time_limit }};
+  var display = document.getElementById('timer-text');
+  var wrap = document.getElementById('timer-wrap');
+  var form = document.getElementById('exam-form');
+
+  function tick() {
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    display.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    if (seconds <= 10) {
+      wrap.style.color = '#ef4444';
+      display.style.color = '#ef4444';
+    }
+    if (seconds <= 0) {
+      // auto submit with empty answer
+      var hidden = document.createElement('input');
+      hidden.type = 'hidden'; hidden.name = 'answer'; hidden.value = '0';
+      form.appendChild(hidden);
+      form.submit();
+      return;
+    }
+    seconds--;
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
+</script>
+{% endif %}
+<script>
+(function() {
+  var elapsed = {{ elapsed_seconds }};
+  var el = document.getElementById('elapsed-text');
+  function fmt(s) {
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var sec = s % 60;
+    if (h > 0) return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+    return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+  }
+  el.textContent = fmt(elapsed);
+  setInterval(function() { elapsed++; el.textContent = fmt(elapsed); }, 1000);
+})();
+</script>
+<script>
+(function() {
+  var radios = document.querySelectorAll('input[type=radio]');
+  var submitBtn = document.getElementById('submit-btn');
+
+  radios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      submitBtn.disabled = false;
+      // reset all rows
+      document.querySelectorAll('.choice-row').forEach(function(row) {
+        row.style.borderColor = '';
+        row.style.boxShadow = '';
+        row.querySelector('.choice-text').style.color = '';
+        row.querySelector('.choice-text').style.fontWeight = '';
+      });
+      // highlight selected
+      var row = this.parentElement.querySelector('.choice-row');
+      row.style.borderColor = '#3b82f6';
+      row.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15)';
+      row.querySelector('.choice-text').style.color = '#1d4ed8';
+      row.querySelector('.choice-text').style.fontWeight = '600';
+    });
+  });
+
+  // prevent double submit
+  document.getElementById('exam-form').addEventListener('submit', function() {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+  });
+})();
+</script>
+{% endblock %}

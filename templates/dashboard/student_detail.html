@@ -1,0 +1,190 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}รายงานผลการสอบ — {{ student.first_name }} {{ student.last_name }}{% endblock %}
+{% block nav_students %}active{% endblock %}
+
+{% block page_title %}<i class="fas fa-chart-bar mr-2 text-info"></i>รายงานผลการสอบรายละเอียด{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'questions:student_list' %}">รายชื่อนักเรียน</a></li>
+  <li class="breadcrumb-item active">{{ student.first_name }} {{ student.last_name }}</li>
+{% endblock %}
+
+{% block content %}
+  <!-- Stat Cards row -->
+  <div class="row mb-3">
+    <!-- จำนวนครั้งที่สอบ -->
+    <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+      <div class="info-box">
+        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-clipboard-list"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">จำนวนครั้งที่สอบ</span>
+          <span class="info-box-number">{{ total_sessions }} ครั้ง</span>
+        </div>
+      </div>
+    </div>
+    <!-- คะแนนสูงสุด -->
+    <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+      <div class="info-box">
+        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-trophy"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">คะแนนสูงสุด</span>
+          <span class="info-box-number">{{ best_score }}%</span>
+        </div>
+      </div>
+    </div>
+    <!-- คะแนนเฉลี่ย -->
+    <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+      <div class="info-box">
+        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-percentage"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">คะแนนเฉลี่ย</span>
+          <span class="info-box-number">{{ avg_score }}%</span>
+        </div>
+      </div>
+    </div>
+    <!-- ปุ่มกลับ -->
+    <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+      <div class="info-box" style="cursor:pointer;" onclick="location.href='{% url 'questions:student_list' %}'">
+        <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-arrow-left"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-text">กลับรายชื่อนักเรียน</span>
+          <span class="info-box-number" style="font-size:1rem;">รายชื่อนักเรียน</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Info Card -->
+  <div class="card card-info card-outline mb-4">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-user-graduate mr-1"></i>ข้อมูลนักเรียน</h3>
+      <div class="card-tools">
+        <a href="{% url 'questions:edit_student' student.pk %}" class="btn btn-sm btn-warning">
+          <i class="fas fa-edit mr-1"></i>แก้ไขข้อมูล
+        </a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>ชื่อ-นามสกุล</strong><br>
+          <span class="text-dark">{{ student.first_name }} {{ student.last_name }}</span>
+        </div>
+        <div class="col-md-3">
+          <strong>รหัสประจำตัว</strong><br>
+          <span class="text-dark">{{ student.student_id }}</span>
+        </div>
+        <div class="col-md-3">
+          <strong>ชั้นปี</strong><br>
+          <span class="text-dark">{{ student.grade|default:"-" }}</span>
+        </div>
+        <div class="col-md-3">
+          <strong>เบอร์โทร</strong><br>
+          <span class="text-dark">{{ student.phone|default:"-" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Cards -->
+  {% if session_data %}
+    {% for sd in session_data %}
+    <div class="card card-outline {% if sd.is_finished %}{% if sd.score_pct >= 80 %}card-success{% elif sd.score_pct >= 60 %}card-warning{% else %}card-danger{% endif %}{% elif sd.session.abandoned_at %}card-danger{% else %}card-secondary{% endif %} collapsed-card mb-3">
+      <div class="card-header">
+        <h3 class="card-title d-flex align-items-center flex-wrap" style="gap:8px;">
+          <span class="text-muted mr-2" style="font-size:.85rem;">
+            <i class="fas fa-calendar-alt mr-1"></i>{{ sd.session.started_at|date:"d/m/Y H:i" }}
+          </span>
+          <!-- badge คะแนน -->
+          {% if sd.is_finished %}
+            <span class="badge {% if sd.score_pct >= 80 %}badge-success{% elif sd.score_pct >= 60 %}badge-warning{% else %}badge-danger{% endif %} px-2 py-1" style="font-size:.9rem;">
+              {{ sd.score_pct }}%
+            </span>
+            <span class="badge badge-light border">
+              ถูก {{ sd.correct }}/{{ sd.total }} ข้อ
+            </span>
+            {% if sd.duration_min %}
+            <span class="badge badge-info">
+              <i class="fas fa-clock mr-1"></i>{{ sd.duration_min }} นาที
+            </span>
+            {% endif %}
+            <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i>เสร็จสิ้น</span>
+          {% elif sd.session.abandoned_at %}
+            <span class="badge badge-secondary px-2 py-1" style="font-size:.9rem;">ยังไม่เสร็จ</span>
+            <span class="badge badge-light border">
+              ตอบแล้ว {{ sd.correct }}/{{ sd.total }} ข้อ
+            </span>
+            <span class="badge badge-danger"><i class="fas fa-sign-out-alt mr-1"></i>ออกกลางคัน</span>
+          {% else %}
+            <span class="badge badge-secondary px-2 py-1" style="font-size:.9rem;">ยังไม่เสร็จ</span>
+            <span class="badge badge-light border">
+              ตอบแล้ว {{ sd.correct }}/{{ sd.total }} ข้อ
+            </span>
+            <span class="badge badge-warning"><i class="fas fa-spinner fa-spin mr-1"></i>กำลังสอบ</span>
+          {% endif %}
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Card Body: ตารางรายข้อ (collapsed by default) -->
+      <div class="card-body p-0" style="display:none;">
+        {% if sd.answer_details %}
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th style="width:65px;" class="text-center">ข้อที่</th>
+              <th>โจทย์</th>
+              <th style="width:90px;" class="text-center">คำตอบที่เลือก</th>
+              <th style="width:80px;" class="text-center">เฉลย</th>
+              <th style="width:80px;" class="text-center">ผล</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for detail in sd.answer_details %}
+            <tr style="{% if detail.is_correct %}background-color:#d4edda;{% else %}background-color:#f8d7da;{% endif %}">
+              <td class="text-center align-middle">{{ detail.question.number }}</td>
+              <td class="align-middle" style="max-width:480px;">
+                <span title="{{ detail.question.stem|default:detail.question.body }}">
+                  {% with text=detail.question.stem|default:detail.question.body %}
+                    {% if text|length > 60 %}{{ text|slice:":60" }}…{% else %}{{ text }}{% endif %}
+                  {% endwith %}
+                </span>
+              </td>
+              <td class="text-center align-middle">
+                <strong>{{ detail.answer|default:"-" }}</strong>
+              </td>
+              <td class="text-center align-middle">
+                {{ detail.correct_answer|default:"-" }}
+              </td>
+              <td class="text-center align-middle">
+                {% if detail.is_correct %}
+                  <span class="badge badge-success"><i class="fas fa-check mr-1"></i>ถูก</span>
+                {% else %}
+                  <span class="badge badge-danger"><i class="fas fa-times mr-1"></i>ผิด</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+          <div class="p-3 text-center text-muted">ไม่มีข้อมูลคำตอบสำหรับการสอบครั้งนี้</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-warning">
+      <i class="fas fa-info-circle mr-1"></i>นักเรียนยังไม่เคยทำข้อสอบ
+    </div>
+  {% endif %}
+
+  <a href="{% url 'questions:student_list' %}" class="btn btn-secondary mt-2 mb-4">
+    <i class="fas fa-arrow-left mr-1"></i>กลับรายชื่อนักเรียน
+  </a>
+{% endblock %}

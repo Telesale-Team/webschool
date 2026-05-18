@@ -1,0 +1,233 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}ลงทะเบียนนักเรียน{% endblock %}
+{% block body_class %}hold-transition{% endblock %}
+
+{% block extra_css %}
+<style>
+  html, body { height: 100%; margin: 0; }
+  .split-page { display: flex; min-height: 100vh; }
+
+  /* ===== LEFT IMAGE ===== */
+  .split-image {
+    flex: 1; position: sticky; top: 0; height: 100vh;
+    overflow: hidden; display: none;
+  }
+  @media (min-width: 900px) { .split-image { display: block; } }
+  .split-image img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .split-image .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(30,58,95,0.75) 0%, rgba(59,130,246,0.4) 100%);
+  }
+  .split-image .caption {
+    position: absolute; bottom: 2.5rem; left: 2.5rem; right: 2.5rem; color: #fff;
+  }
+  .split-image .caption h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: .5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .split-image .caption p { font-size: .95rem; opacity: .85; line-height: 1.7; }
+  .split-image .logo-badge {
+    position: absolute; top: 2rem; left: 2rem;
+    display: flex; align-items: center; gap: .6rem;
+    background: rgba(255,255,255,0.13); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.22); border-radius: 999px;
+    padding: .45rem 1.1rem; color: #fff; font-weight: 600; font-size: .9rem;
+  }
+
+  /* ===== RIGHT FORM ===== */
+  .split-form {
+    flex: 1.1; display: flex; align-items: flex-start; justify-content: center;
+    background: #f8fafc; padding: 3rem 2rem; min-height: 100vh; overflow-y: auto;
+  }
+  .form-box { width: 100%; max-width: 440px; }
+  .form-box .brand { text-align: center; margin-bottom: 2rem; }
+  .form-box .brand .icon-circle {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(59,130,246,0.35); margin-bottom: 1rem;
+  }
+  .form-box .brand h3 { font-size: 1.4rem; font-weight: 700; color: #1e3a5f; margin-bottom: .25rem; }
+  .form-box .brand p { color: #64748b; font-size: .88rem; }
+
+  .form-card {
+    background: #fff; border-radius: 1.25rem;
+    padding: 1.75rem; box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+    border: 1px solid #e2e8f0;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .field-group { margin-bottom: 1rem; }
+  .field-group label { display: block; font-size: .82rem; font-weight: 600; color: #475569; margin-bottom: .3rem; }
+  .field-group .field-icon-wrap { position: relative; }
+  .field-group .field-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; }
+  .field-group input {
+    width: 100%; padding: .6rem .9rem .6rem 2.3rem;
+    border: 1.5px solid #e2e8f0; border-radius: .65rem;
+    font-size: .92rem; color: #1e293b;
+    transition: border-color .15s, box-shadow .15s;
+    background: #f8fafc;
+  }
+  .field-group input:focus {
+    border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    outline: none; background: #fff;
+  }
+  .field-group input.is-invalid { border-color: #ef4444; }
+  .invalid-msg { font-size: .78rem; color: #ef4444; margin-top: .25rem; }
+
+  .divider-label {
+    display: flex; align-items: center; gap: .75rem;
+    color: #94a3b8; font-size: .78rem; font-weight: 600; margin: 1rem 0;
+  }
+  .divider-label::before, .divider-label::after {
+    content: ''; flex: 1; height: 1px; background: #e2e8f0;
+  }
+
+  .btn-register {
+    width: 100%; background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+    color: #fff; border: none; border-radius: .75rem;
+    padding: .8rem; font-size: 1rem; font-weight: 600;
+    margin-top: .25rem; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+  }
+  .btn-register:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,0.4); }
+
+  .link-row { text-align: center; font-size: .88rem; color: #64748b; margin-top: 1.25rem; }
+  .link-row a { color: #3b82f6; font-weight: 600; text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="split-page">
+
+  <!-- LEFT: Image -->
+  <div class="split-image">
+    <img src="{% if config.student_register_bg %}{{ config.student_register_bg }}{% else %}https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=85{% endif %}" alt="student studying">
+    <div class="overlay"></div>
+    <div class="logo-badge">
+      <i class="fas fa-graduation-cap"></i> ห้องสอบออนไลน์
+    </div>
+    <div class="caption">
+      <h2>สมัครสมาชิก<br>เพื่อเข้าห้องสอบ</h2>
+      <p>กรอกข้อมูลให้ครบถ้วน<br>แล้วเริ่มทำข้อสอบได้ทันที</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form -->
+  <div class="split-form">
+    <div class="form-box">
+      <div class="brand">
+        <div class="icon-circle">
+          <i class="fas fa-user-plus" style="color:#fff;font-size:1.4rem;"></i>
+        </div>
+        <h3>ลงทะเบียนนักเรียน</h3>
+        <p>กรอกข้อมูลส่วนตัวเพื่อสร้างบัญชีใหม่</p>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger rounded-lg mb-3" style="font-size:.88rem;">
+        {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="form-card">
+        <form method="post">
+          {% csrf_token %}
+
+          <!-- ชื่อ - นามสกุล -->
+          <div class="field-row">
+            <div class="field-group">
+              <label>ชื่อ</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-user field-icon"></i>
+                <input type="text" name="first_name" placeholder="ชื่อ"
+                       value="{{ form.first_name.value|default:'' }}"
+                       class="{% if form.first_name.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.first_name.errors %}<div class="invalid-msg">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+              <label>นามสกุล</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-user field-icon"></i>
+                <input type="text" name="last_name" placeholder="นามสกุล"
+                       value="{{ form.last_name.value|default:'' }}"
+                       class="{% if form.last_name.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.last_name.errors %}<div class="invalid-msg">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <!-- เลขประจำตัว -->
+          <div class="field-group">
+            <label>เลขประจำตัวนักเรียน</label>
+            <div class="field-icon-wrap">
+              <i class="fas fa-id-card field-icon"></i>
+              <input type="text" name="student_id" placeholder="เลขประจำตัวนักเรียน"
+                     value="{{ form.student_id.value|default:'' }}"
+                     class="{% if form.student_id.errors %}is-invalid{% endif %}" required>
+            </div>
+            {% if form.student_id.errors %}<div class="invalid-msg">{{ form.student_id.errors|join:", " }}</div>{% endif %}
+          </div>
+
+          <!-- เบอร์โทร - ชั้นปี -->
+          <div class="field-row">
+            <div class="field-group">
+              <label>เบอร์โทรศัพท์</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-phone field-icon"></i>
+                <input type="text" name="phone" placeholder="เบอร์โทร"
+                       value="{{ form.phone.value|default:'' }}"
+                       class="{% if form.phone.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.phone.errors %}<div class="invalid-msg">{{ form.phone.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+              <label>ชั้นปี</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-school field-icon"></i>
+                <input type="text" name="grade" placeholder="เช่น ม.6/1"
+                       value="{{ form.grade.value|default:'' }}"
+                       class="{% if form.grade.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.grade.errors %}<div class="invalid-msg">{{ form.grade.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="divider-label">ตั้งรหัสผ่าน</div>
+
+          <!-- รหัสผ่าน -->
+          <div class="field-row">
+            <div class="field-group">
+              <label>รหัสผ่าน</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-lock field-icon"></i>
+                <input type="password" name="password" placeholder="รหัสผ่าน"
+                       class="{% if form.password.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.password.errors %}<div class="invalid-msg">{{ form.password.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+              <label>ยืนยันรหัสผ่าน</label>
+              <div class="field-icon-wrap">
+                <i class="fas fa-lock field-icon"></i>
+                <input type="password" name="confirm_password" placeholder="ยืนยันอีกครั้ง"
+                       class="{% if form.confirm_password.errors %}is-invalid{% endif %}" required>
+              </div>
+              {% if form.confirm_password.errors %}<div class="invalid-msg">{{ form.confirm_password.errors|join:", " }}</div>{% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn-register">
+            <i class="fas fa-user-plus mr-1"></i>สมัครสมาชิก
+          </button>
+        </form>
+      </div>
+
+      <div class="link-row">
+        มีบัญชีอยู่แล้ว? <a href="{% url 'accounts:student_login' %}">เข้าสู่ระบบ</a>
+        &nbsp;·&nbsp;
+        <a href="{% url 'home' %}" style="color:#94a3b8;">← กลับหน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

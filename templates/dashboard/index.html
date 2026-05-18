@@ -1,0 +1,116 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block dashboard_title %}แดชบอร์ด{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block page_title %}
+  แดชบอร์ด <small class="text-muted" style="font-size:1rem;">ยินดีต้อนรับ, {{ teacher.first_name }} {{ teacher.last_name }}</small>
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">แดชบอร์ด</li>
+{% endblock %}
+
+{% block content %}
+  <!-- Stat Cards -->
+  <div class="row">
+    <div class="col-lg-4 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ total_questions }}</h3>
+          <p>ข้อสอบทั้งหมด</p>
+        </div>
+        <div class="icon"><i class="fas fa-question-circle"></i></div>
+        <a href="{% url 'questions:question_list' %}" class="small-box-footer">ดูทั้งหมด <i class="fas fa-arrow-circle-right"></i></a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ total_students }}</h3>
+          <p>นักเรียนลงทะเบียน</p>
+        </div>
+        <div class="icon"><i class="fas fa-users"></i></div>
+        <a href="{% url 'questions:student_list' %}" class="small-box-footer">ดูทั้งหมด <i class="fas fa-arrow-circle-right"></i></a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ total_sessions }}</h3>
+          <p>เซสชันสอบทั้งหมด</p>
+        </div>
+        <div class="icon"><i class="fas fa-clipboard-list"></i></div>
+        <a href="#" class="small-box-footer">ข้อมูลสรุป <i class="fas fa-arrow-circle-right"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tables Row -->
+  <div class="row">
+    <!-- Recent Questions Table -->
+    <div class="col-md-6">
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-question-circle mr-1"></i>ข้อสอบล่าสุด</h3>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover">
+            <thead>
+              <tr><th>ข้อที่</th><th>โจทย์</th><th>หมวดหมู่</th></tr>
+            </thead>
+            <tbody>
+              {% for q in recent_questions %}
+              <tr>
+                <td>{{ q.number }}</td>
+                <td>{{ q.stem|default:q.body|truncatechars:40 }}</td>
+                <td><span class="badge badge-primary">{{ q.category.name|truncatechars:20|default:"-" }}</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">ยังไม่มีข้อสอบ</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions Table -->
+    <div class="col-md-6">
+      <div class="card card-success card-outline">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-history mr-1"></i>เซสชันสอบล่าสุด</h3>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover">
+            <thead>
+              <tr><th>นักเรียน</th><th>ชั้นปี</th><th>วันที่</th><th>สถานะ</th></tr>
+            </thead>
+            <tbody>
+              {% for session in recent_sessions %}
+              <tr>
+                <td>{{ session.student.first_name }} {{ session.student.last_name }}</td>
+                <td>{{ session.student.grade }}</td>
+                <td>{{ session.started_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                  {% if session.finished_at %}
+                    <span class="badge badge-success">เสร็จสิ้น</span>
+                  {% elif session.abandoned_at %}
+                    <span class="badge badge-danger">ออกกลางคัน</span>
+                  {% else %}
+                    <span class="badge badge-warning">กำลังสอบ</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">ยังไม่มีข้อมูล</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Tables Row -->
+{% endblock %}

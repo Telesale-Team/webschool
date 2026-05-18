@@ -1,0 +1,55 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ระบบสอบออนไลน์{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'adminlte/plugins/fontawesome-free/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'adminlte/css/adminlte.min.css' %}">
+  <style>
+    body, .nav-link, .brand-text, h1, h2, h3, h4, h5, p, span, td, th, label, input, button, a {
+      font-family: 'Sarabun', sans-serif !important;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+</head>
+<body class="hold-transition {% block body_class %}sidebar-mini{% endblock %}">
+{% block body %}{% endblock %}
+
+<script src="{% static 'adminlte/plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'adminlte/js/adminlte.min.js' %}"></script>
+{% block extra_js %}{% endblock %}
+<script>
+(function() {
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+  var icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
+  }
+
+  window.toggleTheme = function() {
+    var isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    var ic = document.getElementById('theme-icon');
+    if (ic) {
+      ic.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+  };
+})();
+</script>
+</body>
+</html>
