@@ -1,3 +1,4 @@
+import sys
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Avg, Max, Min
 from django.contrib import messages as django_messages
@@ -5,6 +6,15 @@ from django.http import HttpResponse
 from .models import Question, Category, ExamConfig, Choice, QuestionParameter
 from accounts.models import Student, Teacher
 from exams.models import ExamSession, StudentAnswer
+
+
+def _get_thai_fonts():
+    if sys.platform == 'win32':
+        return 'C:/Windows/Fonts/tahoma.ttf', 'C:/Windows/Fonts/tahomabd.ttf'
+    return (
+        '/usr/share/fonts/truetype/tlwg/Garuda.ttf',
+        '/usr/share/fonts/truetype/tlwg/Garuda-Bold.ttf',
+    )
 
 
 def home(request):
@@ -406,8 +416,9 @@ def export_questions(request):
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    pdfmetrics.registerFont(TTFont('Tahoma', 'C:/Windows/Fonts/tahoma.ttf'))
-    pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'C:/Windows/Fonts/tahomabd.ttf'))
+    _font, _font_bold = _get_thai_fonts()
+    pdfmetrics.registerFont(TTFont('Tahoma', _font))
+    pdfmetrics.registerFont(TTFont('Tahoma-Bold', _font_bold))
     thai = ParagraphStyle('Thai', fontName='Tahoma', fontSize=8, leading=12)
     thai_h1 = ParagraphStyle('ThaiH1', fontName='Tahoma-Bold', fontSize=14, leading=20, spaceAfter=10, alignment=1)
     thai_bold = ParagraphStyle('ThaiBold', fontName='Tahoma-Bold', fontSize=11, leading=16, spaceAfter=6)
@@ -467,8 +478,9 @@ def export_students(request):
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    pdfmetrics.registerFont(TTFont('Tahoma', 'C:/Windows/Fonts/tahoma.ttf'))
-    pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'C:/Windows/Fonts/tahomabd.ttf'))
+    _font, _font_bold = _get_thai_fonts()
+    pdfmetrics.registerFont(TTFont('Tahoma', _font))
+    pdfmetrics.registerFont(TTFont('Tahoma-Bold', _font_bold))
     thai_h1 = ParagraphStyle('ThaiH1', fontName='Tahoma-Bold', fontSize=14, leading=20, spaceAfter=10, alignment=1)
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=2*cm, bottomMargin=2*cm)
@@ -564,8 +576,9 @@ def export_pdf(request):
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
-    pdfmetrics.registerFont(TTFont('Tahoma', 'C:/Windows/Fonts/tahoma.ttf'))
-    pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'C:/Windows/Fonts/tahomabd.ttf'))
+    _font, _font_bold = _get_thai_fonts()
+    pdfmetrics.registerFont(TTFont('Tahoma', _font))
+    pdfmetrics.registerFont(TTFont('Tahoma-Bold', _font_bold))
 
     section = request.GET.get('section', 'all')
     data = _get_report_data()
